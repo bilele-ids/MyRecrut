@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment variables (SECRETS - ne jamais commiter)
+.env.local
+.env*.local
+
+# Build
+dist/
+
+# OS
+.DS_Store
+
+# Debug
+npm-debug.log*
