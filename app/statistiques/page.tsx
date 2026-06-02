@@ -225,7 +225,7 @@ export default function StatistiquesPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number, name: string) => [`${value} candidature${value > 1 ? "s" : ""}`, name]}
+                    formatter={(value) => [`${value} candidature${Number(value) > 1 ? "s" : ""}`]}
                     contentStyle={{ borderRadius: "12px", border: "1px solid #E5E7EB", fontSize: 12 }}
                   />
                 </PieChart>
