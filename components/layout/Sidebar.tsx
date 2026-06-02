@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Briefcase, LogOut, Target, Settings, BarChart2 } from "lucide-react";
+import {
+  LayoutDashboard, Briefcase, LogOut, Target,
+  Settings, BarChart2, Menu, X
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
@@ -13,7 +17,7 @@ const NAV = [
   { href: "/compte", icon: Settings, label: "Mon compte" },
 ];
 
-export function Sidebar() {
+function NavContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -25,15 +29,20 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 flex flex-col h-screen sticky top-0">
+    <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-gray-800">
+      <div className="px-6 py-6 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center">
             <Target size={20} className="text-white" />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">MyRecrut</span>
         </div>
+        {onClose && (
+          <button onClick={onClose} className="text-gray-400 hover:text-white lg:hidden">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -44,6 +53,7 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                 active
@@ -68,6 +78,48 @@ export function Sidebar() {
           Déconnexion
         </button>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Barre mobile en haut */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-brand rounded-lg flex items-center justify-center">
+            <Target size={14} className="text-white" />
+          </div>
+          <span className="text-base font-bold text-white">MyRecrut</span>
+        </div>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="text-gray-400 hover:text-white p-1"
+        >
+          <Menu size={22} />
+        </button>
+      </div>
+
+      {/* Sidebar desktop */}
+      <aside className="hidden lg:flex w-64 bg-gray-900 flex-col h-screen sticky top-0">
+        <NavContent />
+      </aside>
+
+      {/* Drawer mobile */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="fixed top-0 left-0 z-50 w-72 bg-gray-900 h-screen flex flex-col lg:hidden shadow-2xl">
+            <NavContent onClose={() => setMobileOpen(false)} />
+          </aside>
+        </>
+      )}
+    </>
   );
 }

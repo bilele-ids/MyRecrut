@@ -316,7 +316,8 @@ export function CandidatureTable({ candidatures, onEdit, onDelete, onStatusChang
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-      <table className="w-full text-left">
+      <div className="overflow-x-auto">
+      <table className="w-full text-left min-w-[640px]">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
             <th className="pl-4 pr-2 py-3 w-8" />
@@ -350,6 +351,7 @@ export function CandidatureTable({ candidatures, onEdit, onDelete, onStatusChang
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
