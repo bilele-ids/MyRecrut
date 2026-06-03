@@ -2,13 +2,18 @@
 
 import { Bookmark } from "lucide-react";
 
-// Version simple et fiable : title + URL, détection source automatique
 const RAW = `(function(){
 var h=location.hostname;
 var src=h.includes("linkedin")?"LinkedIn":h.includes("indeed")?"Indeed":h.includes("welcometothejungle")?"Welcome to the Jungle":"Autre";
-var titre=document.title.split("|")[0].split("-")[0].split("•")[0].trim();
+var titre=document.title.split("|")[0].split(" - ")[0].split("•")[0].trim();
 var url="https://myrecrut.vercel.app/candidatures?poste="+encodeURIComponent(titre)+"&source="+encodeURIComponent(src)+"&lien="+encodeURIComponent(location.href);
-window.open(url,"_blank");
+var a=document.createElement("a");
+a.href=url;
+a.target="_blank";
+a.rel="noopener noreferrer";
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
 })();`;
 
 const BOOKMARKLET = "javascript:" + RAW.replace(/\n/g, "");
