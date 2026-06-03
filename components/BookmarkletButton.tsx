@@ -7,13 +7,7 @@ var h=location.hostname;
 var src=h.includes("linkedin")?"LinkedIn":h.includes("indeed")?"Indeed":h.includes("welcometothejungle")?"Welcome to the Jungle":"Autre";
 var titre=document.title.split("|")[0].split(" - ")[0].split("•")[0].trim();
 var url="https://myrecrut.vercel.app/candidatures?poste="+encodeURIComponent(titre)+"&source="+encodeURIComponent(src)+"&lien="+encodeURIComponent(location.href);
-var a=document.createElement("a");
-a.href=url;
-a.target="_blank";
-a.rel="noopener noreferrer";
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
+location.href=url;
 })();`;
 
 const BOOKMARKLET = "javascript:" + RAW.replace(/\n/g, "");
