@@ -5,45 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Bookmark, CheckCircle2, Chrome, MousePointer, Zap } from "lucide-react";
 
-const APP_URL = "https://myrecrut.vercel.app";
+import { BookmarkletButton } from "@/components/BookmarkletButton";
 
-const BOOKMARKLET = `javascript:(function(){
-  var src="";
-  var host=location.hostname;
-  if(host.includes("linkedin.com"))src="LinkedIn";
-  else if(host.includes("indeed."))src="Indeed";
-  else if(host.includes("welcometothejungle.com"))src="Welcome to the Jungle";
-  else if(host.includes("hellowork.com"))src="Autre";
-  else src="Autre";
-
-  var titre="";
-  var entreprise="";
-  var localisation="";
-
-  if(host.includes("linkedin.com")){
-    titre=(document.querySelector("h1.t-24")||document.querySelector("h1")||{innerText:""}).innerText.trim();
-    entreprise=(document.querySelector(".job-details-jobs-unified-top-card__company-name a")||document.querySelector(".jobs-unified-top-card__company-name a")||document.querySelector("a.ember-view.t-black.t-normal")||{innerText:""}).innerText.trim();
-    localisation=(document.querySelector(".jobs-unified-top-card__bullet")||document.querySelector(".job-details-jobs-unified-top-card__primary-description-without-tagline")||{innerText:""}).innerText.trim().split("·")[0].trim();
-  } else if(host.includes("indeed.")){
-    titre=(document.querySelector("h1.jobsearch-JobInfoHeader-title")||document.querySelector("h1")||{innerText:""}).innerText.trim();
-    entreprise=(document.querySelector("[data-company-name]")||document.querySelector(".icl-u-lg-mr--sm")||{innerText:""}).innerText.trim();
-    localisation=(document.querySelector("[data-testid='job-location']")||{innerText:""}).innerText.trim();
-  } else if(host.includes("welcometothejungle.com")){
-    titre=(document.querySelector("h1")||{innerText:""}).innerText.trim();
-    entreprise=(document.querySelector("[data-testid='company-title']")||document.querySelector("h2")||{innerText:""}).innerText.trim();
-  } else {
-    titre=(document.querySelector("h1")||{innerText:""}).innerText.trim();
-  }
-
-  var params=new URLSearchParams({
-    entreprise:entreprise||"",
-    poste:titre||"",
-    source:src,
-    lien:location.href,
-    localisation:localisation||""
-  });
-  window.open("${APP_URL}/candidatures?"+params.toString(),"_blank");
-})();`.replace(/\n\s*/g, "");
+const BOOKMARKLET = "";
 
 export default function BookmarkletPage() {
   const [copied, setCopied] = useState(false);
@@ -86,16 +50,7 @@ export default function BookmarkletPage() {
           <p className="text-sm text-gray-500 mb-5 font-medium">
             Glissez ce bouton dans votre barre de favoris :
           </p>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a
-            href={BOOKMARKLET}
-            onClick={(e) => e.preventDefault()}
-            draggable
-            className="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-orange-200 cursor-grab active:cursor-grabbing select-none text-sm"
-          >
-            <Bookmark size={16} />
-            ＋ Ajouter à MyRecrut
-          </a>
+          <BookmarkletButton />
           <p className="text-xs text-gray-400 mt-4">
             Maintenez cliqué et glissez vers votre barre de favoris ↑
           </p>
