@@ -61,11 +61,15 @@ export default function LandingPage() {
         </Link>
 
         {/* App screenshot */}
-        <div className="mt-14 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-gray-300 border border-gray-200 bg-gray-100 aspect-video flex items-center justify-center">
-          <div className="text-center">
-            <Image src="/logo.png" alt="MyRecrut" width={48} height={48} className="mx-auto opacity-30 mb-3" />
-            <p className="text-gray-400 text-sm">Capture d&apos;écran à venir</p>
-          </div>
+        <div className="mt-14 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-gray-300 border border-gray-200">
+          <Image
+            src="/screenshot.png"
+            alt="Aperçu de l'application MyRecrut"
+            width={1520}
+            height={760}
+            className="w-full h-auto"
+            priority
+          />
         </div>
       </section>
 
