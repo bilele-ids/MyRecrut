@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Briefcase, LogOut, Target,
+  LayoutDashboard, Briefcase, LogOut,
   Settings, BarChart2, Menu, X
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
@@ -33,9 +34,7 @@ function NavContent({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="px-6 py-6 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center">
-            <Target size={20} className="text-white" />
-          </div>
+          <Image src="/logo.png" alt="MyRecrut" width={36} height={36} className="rounded-xl bg-white p-0.5" />
           <span className="text-xl font-bold text-white tracking-tight">MyRecrut</span>
         </div>
         {onClose && (
@@ -90,9 +89,7 @@ export function Sidebar() {
       {/* Barre mobile en haut */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-brand rounded-lg flex items-center justify-center">
-            <Target size={14} className="text-white" />
-          </div>
+          <Image src="/logo.png" alt="MyRecrut" width={28} height={28} className="rounded-lg bg-white p-0.5" />
           <span className="text-base font-bold text-white">MyRecrut</span>
         </div>
         <button

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Target } from "lucide-react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -58,8 +58,8 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-brand rounded-2xl mb-4 shadow-lg shadow-orange-200">
-            <Target size={28} className="text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4 shadow-lg shadow-orange-100 border border-gray-100">
+            <Image src="/logo.png" alt="MyRecrut" width={52} height={52} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">MyRecrut</h1>
           <p className="text-gray-500 mt-1 text-sm">Suivi de candidatures simplifié</p>
