@@ -23,13 +23,13 @@ function CandidaturesInner() {
 
   // Pré-remplissage depuis bookmarklet (URL params)
   const prefill = useMemo(() => {
-    const e = searchParams.get("entreprise");
-    if (!e) return null;
+    const lien = searchParams.get("lien");
+    if (!lien) return null;
     return {
-      entreprise: e ?? "",
+      entreprise: searchParams.get("entreprise") ?? "",
       intitule_poste: searchParams.get("poste") ?? "",
       source: searchParams.get("source") ?? "",
-      lien_offre: searchParams.get("lien") ?? "",
+      lien_offre: lien,
       localisation: searchParams.get("localisation") ?? "",
     };
   }, [searchParams]);
