@@ -34,6 +34,8 @@ function CandidaturesInner() {
   // Modal "Coller un lien"
   const [urlModalOpen, setUrlModalOpen] = useState(false);
   const [pastedUrl, setPastedUrl] = useState("");
+  const [scraping, setScraping] = useState(false);
+  const [scrapeError, setScrapeError] = useState("");
 
   // Pré-remplissage depuis extension/bookmarklet (URL params)
   const prefillFromParams = useMemo(() => {
@@ -79,21 +81,42 @@ function CandidaturesInner() {
     setModalOpen(true);
   };
 
-  // Valider l'URL collée et ouvrir le formulaire
-  const handleUrlSubmit = () => {
+  // Scraper l'URL et ouvrir le formulaire pré-rempli
+  const handleUrlSubmit = async () => {
     const url = pastedUrl.trim();
     if (!url) return;
-    const source = detectSource(url);
-    setPrefillData({
-      lien_offre: url,
-      source,
-      entreprise: "",
-      intitule_poste: "",
-    });
-    setEditing(null);
-    setUrlModalOpen(false);
-    setPastedUrl("");
-    setModalOpen(true);
+    setScraping(true);
+    setScrapeError("");
+    try {
+      const res = await fetch("/api/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      setPrefillData({
+        lien_offre: data.lien_offre || url,
+        source: data.source || detectSource(url),
+        entreprise: data.entreprise || "",
+        intitule_poste: data.intitule_poste || "",
+        localisation: data.localisation || "",
+        remuneration: data.remuneration || "",
+        type_contrat: data.type_contrat || "",
+        commentaires: data.commentaires || "",
+      });
+      setEditing(null);
+      setUrlModalOpen(false);
+      setPastedUrl("");
+      setModalOpen(true);
+    } catch {
+      setScrapeError("Impossible de récupérer les infos. Le lien et la source seront pré-remplis.");
+      setPrefillData({ lien_offre: url, source: detectSource(url), entreprise: "", intitule_poste: "" });
+      setUrlModalOpen(false);
+      setPastedUrl("");
+      setModalOpen(true);
+    } finally {
+      setScraping(false);
+    }
   };
 
   const handleSubmit = async (data: CandidatureInsert) => {
@@ -210,12 +233,13 @@ function CandidaturesInner() {
               Source détectée : {detectSource(pastedUrl)}
             </p>
           )}
+          {scrapeError && <p className="text-xs text-red-500">{scrapeError}</p>}
           <div className="flex gap-3 pt-1">
-            <Button onClick={handleUrlSubmit} disabled={!pastedUrl.trim()} className="flex-1 gap-2">
+            <Button onClick={handleUrlSubmit} disabled={!pastedUrl.trim() || scraping} className="flex-1 gap-2">
               <Link2 size={14} />
-              Continuer
+              {scraping ? "Analyse en cours…" : "Importer l'offre"}
             </Button>
-            <Button variant="secondary" onClick={() => { setUrlModalOpen(false); setPastedUrl(""); }}>
+            <Button variant="secondary" onClick={() => { setUrlModalOpen(false); setPastedUrl(""); setScrapeError(""); }}>
               Annuler
             </Button>
           </div>
