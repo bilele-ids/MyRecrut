@@ -2,13 +2,22 @@
 
 import { useMemo, useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Link2 } from "lucide-react";
 import { useCandidatures } from "@/hooks/useCandidatures";
 import { CandidatureTable } from "@/components/CandidatureTable";
 import { CandidatureForm } from "@/components/CandidatureForm";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { STATUS_OPTIONS, type Candidature, type CandidatureInsert, type Status } from "@/types";
+
+// Détecte la source depuis une URL
+function detectSource(url: string): string {
+  if (url.includes("linkedin.com")) return "LinkedIn";
+  if (url.includes("indeed.")) return "Indeed";
+  if (url.includes("welcometothejungle.com")) return "Welcome to the Jungle";
+  if (url.includes("hellowork.com")) return "Autre";
+  return "Autre";
+}
 
 function CandidaturesInner() {
   const { candidatures, loading, create, update, remove } = useCandidatures();
@@ -19,10 +28,15 @@ function CandidaturesInner() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Candidature | null>(null);
+  const [prefillData, setPrefillData] = useState<Partial<CandidatureInsert> | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Candidature | null>(null);
 
-  // Pré-remplissage depuis bookmarklet (URL params)
-  const prefill = useMemo(() => {
+  // Modal "Coller un lien"
+  const [urlModalOpen, setUrlModalOpen] = useState(false);
+  const [pastedUrl, setPastedUrl] = useState("");
+
+  // Pré-remplissage depuis extension/bookmarklet (URL params)
+  const prefillFromParams = useMemo(() => {
     const lien = searchParams.get("lien");
     if (!lien) return null;
     return {
@@ -35,11 +49,12 @@ function CandidaturesInner() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (prefill) {
+    if (prefillFromParams) {
+      setPrefillData(prefillFromParams);
       setEditing(null);
       setModalOpen(true);
     }
-  }, [prefill]);
+  }, [prefillFromParams]);
 
   const filtered = useMemo(() => {
     return candidatures.filter((c) => {
@@ -53,12 +68,31 @@ function CandidaturesInner() {
   }, [candidatures, search, filterStatus]);
 
   const openCreate = () => {
+    setPrefillData(null);
     setEditing(null);
     setModalOpen(true);
   };
 
   const openEdit = (c: Candidature) => {
+    setPrefillData(null);
     setEditing(c);
+    setModalOpen(true);
+  };
+
+  // Valider l'URL collée et ouvrir le formulaire
+  const handleUrlSubmit = () => {
+    const url = pastedUrl.trim();
+    if (!url) return;
+    const source = detectSource(url);
+    setPrefillData({
+      lien_offre: url,
+      source,
+      entreprise: "",
+      intitule_poste: "",
+    });
+    setEditing(null);
+    setUrlModalOpen(false);
+    setPastedUrl("");
     setModalOpen(true);
   };
 
@@ -70,6 +104,7 @@ function CandidaturesInner() {
     }
     setModalOpen(false);
     setEditing(null);
+    setPrefillData(null);
   };
 
   const handleStatusChange = async (id: string, statut: Status) => {
@@ -92,19 +127,22 @@ function CandidaturesInner() {
             {filtered.length} candidature{filtered.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
-          <Plus size={16} />
-          Ajouter
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={() => setUrlModalOpen(true)} className="gap-2">
+            <Link2 size={15} />
+            Depuis un lien
+          </Button>
+          <Button onClick={openCreate} className="gap-2">
+            <Plus size={16} />
+            Ajouter
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Rechercher une entreprise ou un poste…"
@@ -114,10 +152,7 @@ function CandidaturesInner() {
           />
         </div>
         <div className="relative">
-          <Filter
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
+          <Filter size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -147,17 +182,57 @@ function CandidaturesInner() {
         />
       )}
 
+      {/* Modal "Depuis un lien" */}
+      <Modal
+        isOpen={urlModalOpen}
+        onClose={() => { setUrlModalOpen(false); setPastedUrl(""); }}
+        title="Ajouter depuis un lien"
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500">
+            Collez l&apos;URL d&apos;une offre LinkedIn, Indeed, WTTJ ou autre. La source sera détectée automatiquement.
+          </p>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">URL de l&apos;offre</label>
+            <input
+              type="url"
+              placeholder="https://www.linkedin.com/jobs/view/..."
+              value={pastedUrl}
+              onChange={(e) => setPastedUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+              autoFocus
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+            />
+          </div>
+          {pastedUrl && (
+            <p className="text-xs text-brand font-medium">
+              Source détectée : {detectSource(pastedUrl)}
+            </p>
+          )}
+          <div className="flex gap-3 pt-1">
+            <Button onClick={handleUrlSubmit} disabled={!pastedUrl.trim()} className="flex-1 gap-2">
+              <Link2 size={14} />
+              Continuer
+            </Button>
+            <Button variant="secondary" onClick={() => { setUrlModalOpen(false); setPastedUrl(""); }}>
+              Annuler
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Add/Edit Modal */}
       <Modal
         isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); setEditing(null); }}
+        onClose={() => { setModalOpen(false); setEditing(null); setPrefillData(null); }}
         title={editing ? "Modifier la candidature" : "Nouvelle candidature"}
         className="max-w-2xl"
       >
         <CandidatureForm
-          initial={editing ?? prefill ?? undefined}
+          initial={editing ?? prefillData ?? undefined}
           onSubmit={handleSubmit}
-          onCancel={() => { setModalOpen(false); setEditing(null); }}
+          onCancel={() => { setModalOpen(false); setEditing(null); setPrefillData(null); }}
         />
       </Modal>
 
@@ -173,12 +248,8 @@ function CandidaturesInner() {
           <strong>{deleteTarget?.entreprise}</strong> ? Cette action est irréversible.
         </p>
         <div className="flex gap-3">
-          <Button variant="danger" onClick={handleDelete} className="flex-1">
-            Supprimer
-          </Button>
-          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
-            Annuler
-          </Button>
+          <Button variant="danger" onClick={handleDelete} className="flex-1">Supprimer</Button>
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Annuler</Button>
         </div>
       </Modal>
     </div>
