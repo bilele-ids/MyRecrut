@@ -32,13 +32,14 @@ export async function updateSession(request: NextRequest) {
   const url = request.nextUrl.clone();
   const isAuthRoute = url.pathname.startsWith("/auth");
   const isRoot = url.pathname === "/";
+  const isPublic = isRoot || isAuthRoute;
 
-  if (!user && !isAuthRoute) {
+  if (!user && !isPublic) {
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && (isAuthRoute || isRoot)) {
+  if (user && isAuthRoute) {
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
