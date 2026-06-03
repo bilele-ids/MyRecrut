@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Search, Filter } from "lucide-react";
 import { useCandidatures } from "@/hooks/useCandidatures";
 import { CandidatureTable } from "@/components/CandidatureTable";
@@ -9,8 +10,9 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { STATUS_OPTIONS, type Candidature, type CandidatureInsert, type Status } from "@/types";
 
-export default function CandidaturesPage() {
+function CandidaturesInner() {
   const { candidatures, loading, create, update, remove } = useCandidatures();
+  const searchParams = useSearchParams();
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("");
@@ -18,6 +20,26 @@ export default function CandidaturesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Candidature | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Candidature | null>(null);
+
+  // Pré-remplissage depuis bookmarklet (URL params)
+  const prefill = useMemo(() => {
+    const e = searchParams.get("entreprise");
+    if (!e) return null;
+    return {
+      entreprise: e ?? "",
+      intitule_poste: searchParams.get("poste") ?? "",
+      source: searchParams.get("source") ?? "",
+      lien_offre: searchParams.get("lien") ?? "",
+      localisation: searchParams.get("localisation") ?? "",
+    };
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (prefill) {
+      setEditing(null);
+      setModalOpen(true);
+    }
+  }, [prefill]);
 
   const filtered = useMemo(() => {
     return candidatures.filter((c) => {
@@ -133,7 +155,7 @@ export default function CandidaturesPage() {
         className="max-w-2xl"
       >
         <CandidatureForm
-          initial={editing ?? undefined}
+          initial={editing ?? prefill ?? undefined}
           onSubmit={handleSubmit}
           onCancel={() => { setModalOpen(false); setEditing(null); }}
         />
@@ -160,5 +182,13 @@ export default function CandidaturesPage() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+export default function CandidaturesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-gray-400">Chargement…</div>}>
+      <CandidaturesInner />
+    </Suspense>
   );
 }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Briefcase, LogOut,
-  Settings, BarChart2, Menu, X
+  Settings, BarChart2, Menu, X, Bookmark
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ const NAV = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
   { href: "/candidatures", icon: Briefcase, label: "Candidatures" },
   { href: "/statistiques", icon: BarChart2, label: "Statistiques" },
+  { href: "/bookmarklet", icon: Bookmark, label: "Bookmarklet" },
   { href: "/compte", icon: Settings, label: "Mon compte" },
 ];
 
